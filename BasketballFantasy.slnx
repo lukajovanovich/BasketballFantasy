@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="BasketballFantasy.API/BasketballFantasy.API.csproj" />
+  <Project Path="BasketballFantasy.Domain/BasketballFantasy.Domain.csproj" />
+  <Project Path="BasketballFantasy.Infrastructure/BasketballFantasy.Infrastructure.csproj" />
+</Solution>

@@ -1,0 +1,17 @@
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\bin\Debug\net10.0\BasketballFantasy.Infrastructure.deps.json
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\bin\Debug\net10.0\BasketballFantasy.Infrastructure.runtimeconfig.json
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\bin\Debug\net10.0\BasketballFantasy.Infrastructure.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\bin\Debug\net10.0\BasketballFantasy.Infrastructure.pdb
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\bin\Debug\net10.0\BasketballFantasy.Domain.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\bin\Debug\net10.0\BasketballFantasy.Domain.pdb
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.AssemblyInfo.cs
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\Basketba.53728906.Up2Date
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\refint\BasketballFantasy.Infrastructure.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.pdb
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.genruntimeconfig.cache
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\ref\BasketballFantasy.Infrastructure.dll

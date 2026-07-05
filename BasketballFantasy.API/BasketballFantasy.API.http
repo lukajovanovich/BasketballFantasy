@@ -1,0 +1,38 @@
+@BasketballFantasy.API_HostAddress = http://localhost:5126
+
+### Teams - create
+POST {{BasketballFantasy.API_HostAddress}}/teams
+Content-Type: application/json
+
+{
+  "name": "Partizan",
+  "city": "Beograd"
+}
+
+### Players - create
+POST {{BasketballFantasy.API_HostAddress}}/players
+Content-Type: application/json
+
+{
+  "firstName": "Kevin",
+  "lastName": "Punter",
+  "position": "SG",
+  "height": 193,
+  "jerseyNumber": 5,
+  "teamId": 1
+}
+
+### Player statistics - top scorers
+GET {{BasketballFantasy.API_HostAddress}}/player-statistics/top-scorers?count=5
+
+### Fantasy teams - create
+POST {{BasketballFantasy.API_HostAddress}}/fantasy-teams
+Content-Type: application/json
+
+{
+  "name": "Moja Fantasy Petorka",
+  "coachId": 1
+}
+
+### Fantasy teams - calculate points
+GET {{BasketballFantasy.API_HostAddress}}/fantasy-teams/1/points

@@ -1,0 +1,11 @@
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\bin\Debug\net10.0\BasketballFantasy.Domain.deps.json
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\bin\Debug\net10.0\BasketballFantasy.Domain.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\bin\Debug\net10.0\BasketballFantasy.Domain.pdb
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\obj\Debug\net10.0\BasketballFantasy.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\obj\Debug\net10.0\BasketballFantasy.Domain.AssemblyInfoInputs.cache
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\obj\Debug\net10.0\BasketballFantasy.Domain.AssemblyInfo.cs
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\obj\Debug\net10.0\BasketballFantasy.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\obj\Debug\net10.0\BasketballFantasy.Domain.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\obj\Debug\net10.0\refint\BasketballFantasy.Domain.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\obj\Debug\net10.0\BasketballFantasy.Domain.pdb
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Domain\obj\Debug\net10.0\ref\BasketballFantasy.Domain.dll
