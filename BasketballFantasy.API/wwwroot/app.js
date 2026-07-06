@@ -1,9 +1,8 @@
-const storageKey = "basketball-fantasy-session";
-
 const state = {
     token: "",
     userName: "",
     role: "",
+    authMode: "login",
     currentView: "dashboard",
     search: "",
     resources: {},
@@ -179,41 +178,12 @@ document.addEventListener("submit", handleSubmit);
 document.addEventListener("input", handleInput);
 
 function init() {
-    restoreSession();
+    clearStoredSession();
     renderApp();
-
-    if (isAuthenticated()) {
-        void refreshCurrentView(true);
-    }
 }
 
-function restoreSession() {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) {
-        return;
-    }
-
-    try {
-        const session = JSON.parse(raw);
-        state.token = session.token ?? "";
-        state.userName = session.userName ?? "";
-        state.role = session.role ?? "";
-    } catch {
-        localStorage.removeItem(storageKey);
-    }
-}
-
-function persistSession() {
-    if (!state.token) {
-        localStorage.removeItem(storageKey);
-        return;
-    }
-
-    localStorage.setItem(storageKey, JSON.stringify({
-        token: state.token,
-        userName: state.userName,
-        role: state.role
-    }));
+function clearStoredSession() {
+    localStorage.removeItem("basketball-fantasy-session");
 }
 
 function isAuthenticated() {
@@ -224,7 +194,16 @@ function isAdmin() {
     return state.role === "Admin";
 }
 
+function canCreateResource(resourceKey) {
+    if (isAdmin()) {
+        return true;
+    }
+
+    return ["teams", "players", "coaches", "injuries"].includes(resourceKey);
+}
+
 function renderApp() {
+    applyPageMode();
     renderNav();
     renderSessionSummary();
     renderHeroMetrics();
@@ -232,9 +211,24 @@ function renderApp() {
     renderWorkspace();
 }
 
+function applyPageMode() {
+    const shell = document.querySelector(".page-shell");
+    if (!shell) {
+        return;
+    }
+
+    shell.classList.toggle("page-shell--auth", !isAuthenticated());
+    shell.classList.toggle("page-shell--app", isAuthenticated());
+}
+
 function renderNav() {
     const nav = document.getElementById("navPanel");
     if (!nav) {
+        return;
+    }
+
+    if (!isAuthenticated()) {
+        nav.innerHTML = "";
         return;
     }
 
@@ -267,29 +261,15 @@ function renderSessionSummary() {
     }
 
     if (!isAuthenticated()) {
-        target.innerHTML = `
-            <div class="session-chip">
-                <span class="session-chip__status">Nema aktivne sesije</span>
-                <p class="session-chip__title">Prijavi se kao administrator</p>
-                <p class="session-chip__copy">
-                    Kada se prijavis, frontend otkljucava sve preglede, forme i eksport opcije
-                    bez dodatnog podesavanja.
-                </p>
-            </div>
-        `;
+        target.innerHTML = "";
         return;
     }
 
     target.innerHTML = `
-        <div class="session-chip">
-            <span class="session-chip__status session-chip__status--online">Sesija aktivna</span>
-            <p class="session-chip__title">${escapeHtml(state.userName || "Prijavljen korisnik")}</p>
-            <p class="session-chip__copy">
-                Uloga: <strong>${escapeHtml(state.role || "Nepoznata")}</strong><br>
-                Mutacije su omogucene samo za admin nalog.
-            </p>
+        <div class="session-chip session-chip--app">
+            <p class="session-chip__label">Korisnik: ${escapeHtml(state.userName || "Prijavljen korisnik")}</p>
             <div class="button-row">
-                <button class="button button--ghost" type="button" data-action="logout">Odjava</button>
+                <button class="button session-chip__button" type="button" data-action="logout">Odjavi se</button>
             </div>
         </div>
     `;
@@ -301,19 +281,17 @@ function renderHeroMetrics() {
         return;
     }
 
-    const items = isAuthenticated()
-        ? [
-            { label: "Timovi", value: String((state.resources.teams ?? []).length), hint: "Struktura lige i rosteri." },
-            { label: "Igraci", value: String((state.resources.players ?? []).length), hint: "Osnovni roster i pozicije." },
-            { label: "Utakmice", value: String((state.resources.matches ?? []).length), hint: "Rezultati i zakazani mecevi." },
-            { label: "Fantasy timovi", value: String((state.resources.fantasyTeams ?? []).length), hint: "Ekipa za fantasy obracun." }
-        ]
-        : [
-            { label: "JWT login", value: "1", hint: "Frontend cuva token i salje ga ka zasticenim rutama." },
-            { label: "CQRS ekran", value: "7", hint: "Svi glavni resursi imaju svoj pregled." },
-            { label: "Export", value: "2", hint: "Excel izvoz za meceve i fantasy timove." },
-            { label: "Admin seed", value: "Ready", hint: "Prijava radi bez dodatne pripreme." }
-        ];
+    if (!isAuthenticated()) {
+        target.innerHTML = "";
+        return;
+    }
+
+    const items = [
+        { label: "Timovi", value: String((state.resources.teams ?? []).length), hint: "Struktura lige i rosteri." },
+        { label: "Igraci", value: String((state.resources.players ?? []).length), hint: "Osnovni roster i pozicije." },
+        { label: "Utakmice", value: String((state.resources.matches ?? []).length), hint: "Rezultati i zakazani mecevi." },
+        { label: "Fantasy timovi", value: String((state.resources.fantasyTeams ?? []).length), hint: "Ekipa za fantasy obracun." }
+    ];
 
     target.innerHTML = items.map((item) => `
         <article class="metric-card">
@@ -331,104 +309,79 @@ function renderAuthSection() {
     }
 
     if (isAuthenticated()) {
-        target.innerHTML = `
-            <div class="auth-grid">
-                <article class="auth-card">
-                    <p class="section-label">Aktivna sesija</p>
-                    <h2 class="card-title">Frontend je spreman za rad</h2>
-                    <p class="card-subtitle">
-                        Kroz navigaciju sa leve strane mozes brzo da predjes na timove, igrace,
-                        statistike, povrede i fantasy module.
-                    </p>
-                    <div class="auth-note">
-                        Ako zelis samo pregled bez menjanja podataka, mozes koristiti i obican korisnicki nalog
-                        preko registracije. Za kreiranje, izmenu i brisanje koristi admin nalog.
-                    </div>
-                </article>
-
-                <article class="auth-card">
-                    <p class="section-label">Sesija</p>
-                    <h2 class="card-title">${escapeHtml(state.userName)}</h2>
-                    <p class="card-subtitle">
-                        Trenutna uloga: <strong>${escapeHtml(state.role || "Nepoznata")}</strong>
-                    </p>
-                    <div class="button-row">
-                        <button class="button button--ghost" type="button" data-action="logout">Odjava</button>
-                        <button class="button button--soft" type="button" data-view="dashboard">Nazad na pregled</button>
-                    </div>
-                </article>
-            </div>
-        `;
+        target.innerHTML = "";
         return;
     }
 
+    const isLoginMode = state.authMode !== "register";
+
     target.innerHTML = `
-        <div class="auth-grid">
-            <article class="auth-card">
-                <p class="section-label">Prijava</p>
-                <h2 class="card-title">Uloguj se da otkljucas rad sa API-jem</h2>
+        <div class="auth-shell">
+            <article class="auth-card auth-card--compact">
+                <p class="section-label">Pristup sistemu</p>
+                <h2 class="card-title">${isLoginMode ? "Prijava" : "Registracija"}</h2>
                 <p class="card-subtitle">
-                    Frontend koristi iste auth rute kao backend i cuva JWT u lokalnoj sesiji browsera.
+                    ${isLoginMode
+                        ? "Unesi korisnicko ime i lozinku da otvoris aplikaciju."
+                        : "Napravi obican korisnicki nalog sa dva osnovna polja."}
                 </p>
 
-                <form class="form-grid" data-form="login">
-                    <div class="field">
-                        <label for="loginUserName">Korisnicko ime</label>
-                        <input id="loginUserName" name="userName" type="text" placeholder="admin" required>
-                    </div>
-                    <div class="field">
-                        <label for="loginPassword">Lozinka</label>
-                        <input id="loginPassword" name="password" type="password" placeholder="Admin123!" required>
-                    </div>
+                <div class="auth-toggle" role="tablist" aria-label="Prijava i registracija">
+                    <button
+                        class="${isLoginMode ? "auth-toggle__button auth-toggle__button--active" : "auth-toggle__button"}"
+                        type="button"
+                        data-action="show-login">
+                        Prijava
+                    </button>
+                    <button
+                        class="${!isLoginMode ? "auth-toggle__button auth-toggle__button--active" : "auth-toggle__button"}"
+                        type="button"
+                        data-action="show-register">
+                        Registracija
+                    </button>
+                </div>
 
-                    <div class="field field--full">
-                        <div class="button-row">
-                            <button class="button" type="submit">Prijava</button>
-                            <button class="button button--ghost" type="button" data-action="fill-admin">Popuni admin podatke</button>
-                        </div>
-                    </div>
-                </form>
-            </article>
-
-            <article class="auth-card">
-                <p class="section-label">Registracija</p>
-                <h2 class="card-title">Po potrebi napravi i obicnog korisnika</h2>
-                <p class="card-subtitle">
-                    Korisnicka registracija je zgodna za demonstraciju Identity dela projekta.
-                </p>
-
-                <details>
-                    <summary>Otvori registracionu formu</summary>
-                    <div class="details-body">
-                        <form class="form-grid" data-form="register">
-                            <div class="field">
-                                <label for="registerUserName">Korisnicko ime</label>
-                                <input id="registerUserName" name="userName" type="text" required>
-                            </div>
-                            <div class="field">
-                                <label for="registerEmail">Email</label>
-                                <input id="registerEmail" name="email" type="email" required>
-                            </div>
-                            <div class="field">
-                                <label for="registerFirstName">Ime</label>
-                                <input id="registerFirstName" name="firstName" type="text" required>
-                            </div>
-                            <div class="field">
-                                <label for="registerLastName">Prezime</label>
-                                <input id="registerLastName" name="lastName" type="text" required>
-                            </div>
-                            <div class="field field--full">
-                                <label for="registerPassword">Lozinka</label>
-                                <input id="registerPassword" name="password" type="password" minlength="6" required>
-                            </div>
-                            <div class="field field--full">
-                                <button class="button" type="submit">Registruj korisnika</button>
-                            </div>
-                        </form>
-                    </div>
-                </details>
+                ${isLoginMode ? renderLoginForm() : renderRegisterForm()}
             </article>
         </div>
+    `;
+}
+
+function renderLoginForm() {
+    return `
+        <form class="form-grid auth-form" data-form="login">
+            <div class="field field--full">
+                <label for="loginUserName">Korisnicko ime</label>
+                <input id="loginUserName" name="userName" type="text" placeholder="Unesi korisnicko ime" required>
+            </div>
+            <div class="field field--full">
+                <label for="loginPassword">Lozinka</label>
+                <input id="loginPassword" name="password" type="password" placeholder="Unesi lozinku" required>
+            </div>
+            <div class="field field--full">
+                <div class="button-row">
+                    <button class="button button--full" type="submit">Prijava</button>
+                </div>
+            </div>
+        </form>
+    `;
+}
+
+function renderRegisterForm() {
+    return `
+        <form class="form-grid auth-form" data-form="register">
+            <div class="field field--full">
+                <label for="registerUserName">Korisnicko ime</label>
+                <input id="registerUserName" name="userName" type="text" minlength="3" required>
+            </div>
+            <div class="field field--full">
+                <label for="registerPassword">Lozinka</label>
+                <input id="registerPassword" name="password" type="password" minlength="6" required>
+            </div>
+            <div class="field field--full">
+                <button class="button button--full" type="submit">Registruj korisnika</button>
+            </div>
+        </form>
     `;
 }
 
@@ -439,16 +392,7 @@ function renderWorkspace() {
     }
 
     if (!isAuthenticated()) {
-        target.innerHTML = `
-            <article class="empty-state">
-                <p class="section-label">Zakljucan radni prostor</p>
-                <h2 class="empty-state__title">Prvo se prijavi da bi frontend povukao podatke iz API-ja</h2>
-                <p class="empty-state__copy">
-                    Posle prijave automatski ces dobiti dashboard sa osnovnim brojkama,
-                    top scorer izvestajem i pregledom aktivnih povreda.
-                </p>
-            </article>
-        `;
+        target.innerHTML = "";
         return;
     }
 
@@ -474,15 +418,10 @@ function renderWorkspace() {
     target.innerHTML = `
         <div class="workspace-grid">
             <article class="panel">
-                <div class="toolbar">
+                <div class="toolbar toolbar--minimal">
                     <div class="toolbar__copy">
-                        <p class="section-label">${escapeHtml(config.label)}</p>
-                        <h2 class="card-title">${escapeHtml(config.label)} u jednom mestu</h2>
-                        <p class="card-subtitle">
-                            Prikaz, pretraga i osnovne akcije nad resursom <code>/${escapeHtml(config.endpoint.replace("/", ""))}</code>.
-                        </p>
+                        <h2 class="card-title toolbar__title">${escapeHtml(config.label)}</h2>
                     </div>
-
                     <div class="toolbar__actions">
                         <div class="toolbar__search">
                             <input
@@ -492,7 +431,7 @@ function renderWorkspace() {
                                 placeholder="Pretrazi prikazane kartice">
                         </div>
                         <button class="button button--ghost" type="button" data-action="refresh-view">Osvezi</button>
-                        ${isAdmin() ? `<button class="button" type="button" data-action="new-record">${escapeHtml(config.createLabel)}</button>` : ""}
+                        ${canCreateResource(state.currentView) ? `<button class="button" type="button" data-action="new-record">${escapeHtml(config.createLabel)}</button>` : ""}
                     </div>
                 </div>
             </article>
@@ -525,12 +464,7 @@ function renderDashboard() {
             <article class="panel">
                 <div class="toolbar">
                     <div class="toolbar__copy">
-                        <p class="section-label">Pregled</p>
-                        <h2 class="card-title">Brzi dashboard za svakodnevni rad</h2>
-                        <p class="card-subtitle">
-                            Sa jedne strane su najbitnije brojke, a sa druge dve sekcije koje odmah
-                            vode ka akcijama u sistemu.
-                        </p>
+                        <h2 class="card-title">Dashboard</h2>
                     </div>
 
                     <div class="toolbar__actions">
@@ -577,16 +511,6 @@ function renderDashboard() {
                     </div>
                 </article>
             </div>
-
-            <article class="panel">
-                <p class="section-label">Preporuceni koraci</p>
-                <div class="button-row">
-                    <button class="button" type="button" data-view="teams">Otvori timove</button>
-                    <button class="button button--soft" type="button" data-view="players">Pregled igraca</button>
-                    <button class="button button--soft" type="button" data-view="matches">Pregled utakmica</button>
-                    <button class="button button--soft" type="button" data-view="fantasyTeams">Fantasy timovi</button>
-                </div>
-            </article>
         </div>
     `;
 }
@@ -771,8 +695,20 @@ function renderDetailPanel() {
 
 function handleInput(event) {
     if (event.target.matches('[data-input="resource-search"]')) {
-        state.search = event.target.value.trim();
+        const input = event.target;
+        const selectionStart = input.selectionStart ?? input.value.length;
+        const selectionEnd = input.selectionEnd ?? input.value.length;
+
+        state.search = input.value;
         renderWorkspace();
+
+        const nextInput = document.querySelector('[data-input="resource-search"]');
+        if (nextInput instanceof HTMLInputElement) {
+            nextInput.focus();
+            nextInput.setSelectionRange(
+                Math.min(selectionStart, nextInput.value.length),
+                Math.min(selectionEnd, nextInput.value.length));
+        }
     }
 }
 
@@ -788,8 +724,15 @@ function handleClick(event) {
     if (actionButton) {
         const action = actionButton.dataset.action;
 
-        if (action === "fill-admin") {
-            fillAdminCredentials();
+        if (action === "show-login") {
+            state.authMode = "login";
+            renderAuthSection();
+            return;
+        }
+
+        if (action === "show-register") {
+            state.authMode = "register";
+            renderAuthSection();
             return;
         }
 
@@ -799,7 +742,8 @@ function handleClick(event) {
         }
 
         if (action === "new-record") {
-            void openPrimaryForm(state.currentView, null);
+            const resourceKey = actionButton.dataset.resourceKey ?? state.currentView;
+            void startCreateFlow(resourceKey);
             return;
         }
 
@@ -866,6 +810,19 @@ async function setView(view) {
     if (isAuthenticated()) {
         await refreshCurrentView(false);
     }
+}
+
+async function startCreateFlow(resourceKey) {
+    if (!resources[resourceKey] || !canCreateResource(resourceKey)) {
+        showToast("Nemas dozvolu za kreiranje ovog zapisa.", "error");
+        return;
+    }
+
+    if (state.currentView !== resourceKey) {
+        await setView(resourceKey);
+    }
+
+    await openPrimaryForm(resourceKey, null);
 }
 
 async function refreshCurrentView(force) {
@@ -941,13 +898,15 @@ async function login(form) {
         state.token = response.token;
         state.userName = response.userName;
         state.role = response.role;
-        persistSession();
+        state.authMode = "login";
 
         state.currentView = "dashboard";
         state.resources = {};
+        state.options = {};
         state.dashboard = null;
         state.formState = null;
         state.detailState = null;
+        state.search = "";
 
         form.reset();
         showToast("Prijava je uspesna.", "success");
@@ -972,13 +931,15 @@ async function register(form) {
         state.token = response.token;
         state.userName = response.userName;
         state.role = response.role;
-        persistSession();
+        state.authMode = "login";
 
         state.currentView = "dashboard";
         state.resources = {};
+        state.options = {};
         state.dashboard = null;
         state.formState = null;
         state.detailState = null;
+        state.search = "";
 
         form.reset();
         showToast("Korisnik je registrovan i prijavljen.", "success");
@@ -994,6 +955,8 @@ function logout() {
     state.token = "";
     state.userName = "";
     state.role = "";
+    state.authMode = "login";
+    state.currentView = "dashboard";
     state.resources = {};
     state.options = {};
     state.dashboard = null;
@@ -1001,7 +964,6 @@ function logout() {
     state.detailState = null;
     state.search = "";
 
-    persistSession();
     renderApp();
     showToast("Odjava je uspesna.", "info");
 }
@@ -1409,11 +1371,11 @@ function renderKeyValueGrid(data) {
 }
 
 function filterRecords(records, config, term) {
-    if (!term) {
+    const normalizedTerm = term.trim().toLowerCase();
+
+    if (!normalizedTerm) {
         return records;
     }
-
-    const lowered = term.toLowerCase();
 
     return records.filter((record) => {
         const haystack = [
@@ -1425,23 +1387,8 @@ function filterRecords(records, config, term) {
             .join(" ")
             .toLowerCase();
 
-        return haystack.includes(lowered);
+        return haystack.includes(normalizedTerm);
     });
-}
-
-function fillAdminCredentials() {
-    const userName = document.getElementById("loginUserName");
-    const password = document.getElementById("loginPassword");
-
-    if (userName instanceof HTMLInputElement) {
-        userName.value = "admin";
-    }
-
-    if (password instanceof HTMLInputElement) {
-        password.value = "Admin123!";
-    }
-
-    showToast("Admin podaci su ubaceni u formu.", "info");
 }
 
 async function downloadFile(url, fallbackName) {

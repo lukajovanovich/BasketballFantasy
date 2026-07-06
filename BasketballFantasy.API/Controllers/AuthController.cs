@@ -38,22 +38,19 @@ namespace BasketballFantasy.API.Controllers
                 return ValidationError(validationResult);
             }
 
-            if (await _userManager.FindByNameAsync(request.UserName) != null)
+            var normalizedUserName = request.UserName.Trim();
+            if (await _userManager.FindByNameAsync(normalizedUserName) != null)
             {
                 return BadRequest("Korisnicko ime je vec zauzeto.");
             }
 
-            if (await _userManager.FindByEmailAsync(request.Email) != null)
-            {
-                return BadRequest("Korisnik sa tim email-om vec postoji.");
-            }
-
+            var generatedEmail = $"{Guid.NewGuid():N}@basketballfantasy.local";
             var user = new ApplicationUser
             {
-                UserName = request.UserName,
-                Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName
+                UserName = normalizedUserName,
+                Email = generatedEmail,
+                FirstName = normalizedUserName,
+                LastName = "User"
             };
 
             var createResult = await _userManager.CreateAsync(user, request.Password);

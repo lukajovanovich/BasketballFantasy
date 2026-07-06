@@ -48,7 +48,6 @@ namespace BasketballFantasy.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = ApplicationRoles.Admin)]
         public async Task<IActionResult> Create([FromBody] CreateInjuryRequest request)
         {
             var validationResult = _createValidator.Validate(request);

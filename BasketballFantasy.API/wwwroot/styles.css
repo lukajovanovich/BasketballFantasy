@@ -68,6 +68,34 @@ button {
     padding: 28px 0 42px;
 }
 
+.page-shell--auth {
+    width: min(960px, calc(100% - 32px));
+}
+
+.page-shell--app .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, #1f3f5b, #2d5c83);
+    box-shadow: 0 24px 60px rgba(31, 63, 91, 0.22);
+}
+
+.page-shell--app .hero::after {
+    display: none;
+}
+
+.page-shell--app .hero__brand {
+    display: flex;
+    align-items: center;
+}
+
+.page-shell--app .hero__status {
+    width: min(100%, 420px);
+    justify-self: end;
+}
+
 .hero {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
@@ -99,6 +127,28 @@ button {
     z-index: 1;
 }
 
+.hero__app-title {
+    display: none;
+    margin: 0;
+    color: #f4f9ff;
+    font-size: clamp(1.3rem, 2vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hero__landing-copy {
+    display: block;
+}
+
+.page-shell--app .hero__app-title {
+    display: block;
+}
+
+.page-shell--app .hero__landing-copy {
+    display: none;
+}
+
 .eyebrow {
     margin: 0 0 10px;
     letter-spacing: 0.18em;
@@ -123,6 +173,10 @@ button {
 
 .hero__status {
     align-self: stretch;
+}
+
+.hero__status:empty {
+    display: none;
 }
 
 .layout {
@@ -242,6 +296,10 @@ button {
     gap: 22px;
 }
 
+.auth-shell {
+    display: grid;
+}
+
 .metric-strip {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -280,6 +338,12 @@ button {
     padding: 22px;
 }
 
+.auth-card--compact {
+    max-width: 460px;
+    width: 100%;
+    margin: 0 auto;
+}
+
 .card-title {
     margin: 0;
     font-family: var(--display-font);
@@ -290,6 +354,32 @@ button {
     margin: 8px 0 0;
     color: var(--text-soft);
     line-height: 1.55;
+}
+
+.auth-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 20px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid var(--line);
+}
+
+.auth-toggle__button {
+    min-height: 40px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-soft);
+    font-weight: 700;
+    transition: background 180ms ease, color 180ms ease;
+}
+
+.auth-toggle__button--active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: #fffaf4;
 }
 
 .button-row,
@@ -348,6 +438,10 @@ button {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
+    margin-top: 18px;
+}
+
+.auth-form {
     margin-top: 18px;
 }
 
@@ -410,9 +504,17 @@ button {
     gap: 16px;
 }
 
+.toolbar--minimal {
+    justify-content: space-between;
+}
+
 .toolbar__copy {
     display: grid;
     gap: 8px;
+}
+
+.toolbar__title {
+    font-size: 1.25rem;
 }
 
 .toolbar__search {
@@ -582,6 +684,31 @@ button {
     border: 1px solid rgba(255, 223, 186, 0.18);
 }
 
+.session-chip--app {
+    background: rgba(8, 23, 38, 0.18);
+    border: 1px solid rgba(214, 235, 255, 0.26);
+    box-shadow: none;
+}
+
+.session-chip__label {
+    margin: 0;
+    color: #f4f9ff;
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.session-chip__button {
+    background: #f5fbff;
+    color: #1f3f5b;
+    box-shadow: none;
+}
+
+.session-chip__button:hover,
+.session-chip__button:focus-visible {
+    background: #e4f0fb;
+}
+
 .session-chip__status {
     display: inline-flex;
     align-items: center;
@@ -687,6 +814,24 @@ details > .details-body {
     color: var(--text-soft);
 }
 
+.page-shell--auth .hero {
+    display: none;
+}
+
+.page-shell--auth .layout {
+    grid-template-columns: 1fr;
+    margin-top: 0;
+}
+
+.page-shell--auth .sidebar {
+    display: none;
+}
+
+.page-shell--auth .content {
+    max-width: 460px;
+    margin: 0 auto;
+}
+
 @keyframes reveal {
     from {
         opacity: 0;
@@ -700,6 +845,15 @@ details > .details-body {
 }
 
 @media (max-width: 1100px) {
+    .page-shell--app .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .page-shell--app .hero__status {
+        width: 100%;
+        justify-self: stretch;
+    }
+
     .hero,
     .layout,
     .auth-grid,
