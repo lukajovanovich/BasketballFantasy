@@ -170,4 +170,9 @@ C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\obj\Debug\net10.0
 C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\obj\Debug\net10.0\BasketballFantasy.API.pdb
 C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\obj\Debug\net10.0\BasketballFantasy.API.genruntimeconfig.cache
 C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\obj\Debug\net10.0\ref\BasketballFantasy.API.dll
-C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\bin\Debug\net10.0\AutoMapper.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\bin\Debug\net10.0\MediatR.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\bin\Debug\net10.0\MediatR.Contracts.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\bin\Debug\net10.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.API\obj\Debug\net10.0\BasketballFantasy.API.sourcelink.json

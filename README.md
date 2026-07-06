@@ -1,6 +1,7 @@
 # Basketball Fantasy
 
 ASP.NET Core Web API projekat za pracenje statistike kosarkasa i formiranje fantasy tima.
+Arhitektura je dopunjena sa `ASP.NET Identity`, `JWT` autentikacijom, `MediatR` CQRS pristupom i `AutoMapper` mapiranjem DTO modela.
 
 ## Struktura foldera
 
@@ -20,11 +21,16 @@ projekat/
 |- BasketballFantasy.API/
 |  |- Controllers/
 |  |- DTOs/
+|  |- Auth/
+|  |- Features/
+|  |- Mapping/
 |  |- Services/
 |  |- Validators/
 |  |- Program.cs
 |  |- appsettings.json
 |  |- BasketballFantasy.API.http
+|- .config/
+|  |- dotnet-tools.json
 ```
 
 ## Entiteti i veze
@@ -63,6 +69,11 @@ FantasyPoints = Points + Rebounds * 1.2 + Assists * 1.5 + Steals * 2 + Blocks * 
 - `GET/POST /fantasy-teams`
 - `GET/PUT/DELETE /fantasy-teams/{id}`
 
+### Auth
+
+- `POST /auth/register`
+- `POST /auth/login`
+
 ### Dodatni endpoint-i
 
 - `GET /teams/{id}/players`
@@ -100,6 +111,13 @@ dotnet tool run dotnet-ef database update --project "BasketballFantasy.Infrastru
 ```powershell
 dotnet run --project "BasketballFantasy.API\BasketballFantasy.API.csproj"
 ```
+
+5. Prijava za administraciju:
+
+- korisnicko ime: `admin`
+- lozinka: `Admin123!`
+
+Posle login-a koristi JWT token kroz `Authorization: Bearer <token>`.
 
 ## Sta napisati u dokumentaciji
 

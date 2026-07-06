@@ -1,77 +1,55 @@
+using BasketballFantasy.API.Auth;
 using BasketballFantasy.API.DTOs.Matches;
-using BasketballFantasy.API.Services;
-using BasketballFantasy.Domain.Entities;
-using BasketballFantasy.Domain.Repositories;
+using BasketballFantasy.API.Features.Matches;
 using FluentValidation;
-using FluentValidation.Results;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasketballFantasy.API.Controllers
 {
-    [ApiController]
+    [Authorize]
     [Route("matches")]
-    public class MatchesController : ControllerBase
+    public class MatchesController : ApiControllerBase
     {
-        private readonly IUnitOfWork _uow;
+        private readonly ISender _sender;
         private readonly IValidator<CreateMatchRequest> _createValidator;
         private readonly IValidator<UpdateMatchRequest> _updateValidator;
-        private readonly ExcelExportService _excelExportService;
-        private readonly FantasyPointsService _fantasyPointsService;
 
         public MatchesController(
-            IUnitOfWork uow,
+            ISender sender,
             IValidator<CreateMatchRequest> createValidator,
-            IValidator<UpdateMatchRequest> updateValidator,
-            ExcelExportService excelExportService,
-            FantasyPointsService fantasyPointsService)
+            IValidator<UpdateMatchRequest> updateValidator)
         {
-            _uow = uow;
+            _sender = sender;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
-            _excelExportService = excelExportService;
-            _fantasyPointsService = fantasyPointsService;
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var matches = _uow.Matches.GetAllWithTeams()
-                .Select(MapMatch)
-                .ToList();
-
+            var matches = await _sender.Send(new GetAllMatchesQuery());
             return Ok(matches);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var match = _uow.Matches.GetByIdWithDetails(id);
-            if (match == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(MapMatch(match));
+            var match = await _sender.Send(new GetMatchByIdQuery(id));
+            return Ok(match);
         }
 
         [HttpGet("{id}/statistics/export")]
-        public IActionResult ExportStatistics(int id)
+        public async Task<IActionResult> ExportStatistics(int id)
         {
-            var match = _uow.Matches.GetByIdWithStatistics(id);
-            if (match == null)
-            {
-                return NotFound();
-            }
-
-            var content = _excelExportService.ExportMatchStatistics(match, _fantasyPointsService);
-            return File(
-                content,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"match-statistics-{id}.xlsx");
+            var export = await _sender.Send(new ExportMatchStatisticsQuery(id));
+            return File(export.Content, export.ContentType, export.FileName);
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateMatchRequest request)
+        [Authorize(Roles = ApplicationRoles.Admin)]
+        public async Task<IActionResult> Create([FromBody] CreateMatchRequest request)
         {
             var validationResult = _createValidator.Validate(request);
             if (!validationResult.IsValid)
@@ -79,89 +57,30 @@ namespace BasketballFantasy.API.Controllers
                 return ValidationError(validationResult);
             }
 
-            if (_uow.Teams.GetById(request.HomeTeamId) == null || _uow.Teams.GetById(request.AwayTeamId) == null)
-            {
-                return BadRequest("Jedan ili oba tima ne postoje.");
-            }
-
-            var match = new Match
-            {
-                HomeTeamId = request.HomeTeamId,
-                AwayTeamId = request.AwayTeamId,
-                MatchDate = request.MatchDate,
-                HomeScore = request.HomeScore,
-                AwayScore = request.AwayScore
-            };
-
-            _uow.Matches.Add(match);
-            _uow.SaveChanges();
-
-            var createdMatch = _uow.Matches.GetByIdWithDetails(match.Id)!;
-            return CreatedAtAction(nameof(GetById), new { id = match.Id }, MapMatch(createdMatch));
+            var match = await _sender.Send(new CreateMatchCommand(request));
+            return CreatedAtAction(nameof(GetById), new { id = match.Id }, match);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] UpdateMatchRequest request)
+        [Authorize(Roles = ApplicationRoles.Admin)]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateMatchRequest request)
         {
-            var match = _uow.Matches.GetById(id);
-            if (match == null)
-            {
-                return NotFound();
-            }
-
             var validationResult = _updateValidator.Validate(request);
             if (!validationResult.IsValid)
             {
                 return ValidationError(validationResult);
             }
 
-            if (_uow.Teams.GetById(request.HomeTeamId) == null || _uow.Teams.GetById(request.AwayTeamId) == null)
-            {
-                return BadRequest("Jedan ili oba tima ne postoje.");
-            }
-
-            match.HomeTeamId = request.HomeTeamId;
-            match.AwayTeamId = request.AwayTeamId;
-            match.MatchDate = request.MatchDate;
-            match.HomeScore = request.HomeScore;
-            match.AwayScore = request.AwayScore;
-
-            _uow.Matches.Update(match);
-            _uow.SaveChanges();
-
-            var updatedMatch = _uow.Matches.GetByIdWithDetails(id)!;
-            return Ok(MapMatch(updatedMatch));
+            var match = await _sender.Send(new UpdateMatchCommand(id, request));
+            return Ok(match);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [Authorize(Roles = ApplicationRoles.Admin)]
+        public async Task<IActionResult> Delete(int id)
         {
-            var match = _uow.Matches.GetById(id);
-            if (match == null)
-            {
-                return NotFound();
-            }
-
-            _uow.Matches.Remove(match);
-            _uow.SaveChanges();
-
+            await _sender.Send(new DeleteMatchCommand(id));
             return NoContent();
         }
-
-        private IActionResult ValidationError(ValidationResult validationResult) =>
-            BadRequest(validationResult.Errors.Select(error => new { error.PropertyName, error.ErrorMessage }));
-
-        private static MatchDto MapMatch(Match match) =>
-            new()
-            {
-                Id = match.Id,
-                HomeTeamId = match.HomeTeamId,
-                HomeTeamName = match.HomeTeam?.Name ?? string.Empty,
-                AwayTeamId = match.AwayTeamId,
-                AwayTeamName = match.AwayTeam?.Name ?? string.Empty,
-                MatchDate = match.MatchDate,
-                HomeScore = match.HomeScore,
-                AwayScore = match.AwayScore
-            };
     }
 }

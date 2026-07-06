@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BasketballFantasy.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3fdc05c56e37caa2b0b4784316cca97e0067f700")]
 [assembly: System.Reflection.AssemblyProductAttribute("BasketballFantasy.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BasketballFantasy.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,9 +1,12 @@
 using BasketballFantasy.Domain.Entities;
+using BasketballFantasy.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BasketballFantasy.Infrastructure
 {
-    public class BasketballFantasyContext : DbContext
+    public class BasketballFantasyContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
     {
         public BasketballFantasyContext(DbContextOptions<BasketballFantasyContext> options)
             : base(options)
@@ -26,6 +29,11 @@ namespace BasketballFantasy.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ApplicationUser>().Property(user => user.FirstName).HasMaxLength(100).IsRequired();
+            modelBuilder.Entity<ApplicationUser>().Property(user => user.LastName).HasMaxLength(100).IsRequired();
+
             modelBuilder.Entity<Team>().Property(t => t.Name).HasMaxLength(100).IsRequired();
             modelBuilder.Entity<Team>().Property(t => t.City).HasMaxLength(100).IsRequired();
 

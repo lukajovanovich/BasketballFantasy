@@ -15,3 +15,4 @@ C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\De
 C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.pdb
 C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.genruntimeconfig.cache
 C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\ref\BasketballFantasy.Infrastructure.dll
+C:\Users\Luka\Desktop\faks\.NET\projekat\BasketballFantasy.Infrastructure\obj\Debug\net10.0\BasketballFantasy.Infrastructure.sourcelink.json

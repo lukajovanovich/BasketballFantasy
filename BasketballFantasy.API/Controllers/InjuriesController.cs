@@ -1,64 +1,55 @@
+using BasketballFantasy.API.Auth;
 using BasketballFantasy.API.DTOs.Injuries;
-using BasketballFantasy.Domain.Entities;
-using BasketballFantasy.Domain.Repositories;
+using BasketballFantasy.API.Features.Injuries;
 using FluentValidation;
-using FluentValidation.Results;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasketballFantasy.API.Controllers
 {
-    [ApiController]
+    [Authorize]
     [Route("injuries")]
-    public class InjuriesController : ControllerBase
+    public class InjuriesController : ApiControllerBase
     {
-        private readonly IUnitOfWork _uow;
+        private readonly ISender _sender;
         private readonly IValidator<CreateInjuryRequest> _createValidator;
         private readonly IValidator<UpdateInjuryRequest> _updateValidator;
 
         public InjuriesController(
-            IUnitOfWork uow,
+            ISender sender,
             IValidator<CreateInjuryRequest> createValidator,
             IValidator<UpdateInjuryRequest> updateValidator)
         {
-            _uow = uow;
+            _sender = sender;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var injuries = _uow.Injuries.GetAllWithPlayer()
-                .Select(MapInjury)
-                .ToList();
-
+            var injuries = await _sender.Send(new GetAllInjuriesQuery());
             return Ok(injuries);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var injury = _uow.Injuries.GetByIdWithPlayer(id);
-            if (injury == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(MapInjury(injury));
+            var injury = await _sender.Send(new GetInjuryByIdQuery(id));
+            return Ok(injury);
         }
 
         [HttpGet("active")]
-        public IActionResult GetActive()
+        public async Task<IActionResult> GetActive()
         {
-            var injuries = _uow.Injuries.GetActiveInjuries()
-                .Select(MapInjury)
-                .ToList();
-
+            var injuries = await _sender.Send(new GetActiveInjuriesQuery());
             return Ok(injuries);
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateInjuryRequest request)
+        [Authorize(Roles = ApplicationRoles.Admin)]
+        public async Task<IActionResult> Create([FromBody] CreateInjuryRequest request)
         {
             var validationResult = _createValidator.Validate(request);
             if (!validationResult.IsValid)
@@ -66,88 +57,30 @@ namespace BasketballFantasy.API.Controllers
                 return ValidationError(validationResult);
             }
 
-            if (_uow.Players.GetById(request.PlayerId) == null)
-            {
-                return BadRequest($"Igrac sa Id={request.PlayerId} ne postoji.");
-            }
-
-            var injury = new Injury
-            {
-                PlayerId = request.PlayerId,
-                Description = request.Description,
-                InjuryDate = request.InjuryDate,
-                RecoveryDate = request.RecoveryDate,
-                IsActive = request.IsActive
-            };
-
-            _uow.Injuries.Add(injury);
-            _uow.SaveChanges();
-
-            var createdInjury = _uow.Injuries.GetByIdWithPlayer(injury.Id)!;
-            return CreatedAtAction(nameof(GetById), new { id = injury.Id }, MapInjury(createdInjury));
+            var injury = await _sender.Send(new CreateInjuryCommand(request));
+            return CreatedAtAction(nameof(GetById), new { id = injury.Id }, injury);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] UpdateInjuryRequest request)
+        [Authorize(Roles = ApplicationRoles.Admin)]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateInjuryRequest request)
         {
-            var injury = _uow.Injuries.GetById(id);
-            if (injury == null)
-            {
-                return NotFound();
-            }
-
             var validationResult = _updateValidator.Validate(request);
             if (!validationResult.IsValid)
             {
                 return ValidationError(validationResult);
             }
 
-            if (_uow.Players.GetById(request.PlayerId) == null)
-            {
-                return BadRequest($"Igrac sa Id={request.PlayerId} ne postoji.");
-            }
-
-            injury.PlayerId = request.PlayerId;
-            injury.Description = request.Description;
-            injury.InjuryDate = request.InjuryDate;
-            injury.RecoveryDate = request.RecoveryDate;
-            injury.IsActive = request.IsActive;
-
-            _uow.Injuries.Update(injury);
-            _uow.SaveChanges();
-
-            var updatedInjury = _uow.Injuries.GetByIdWithPlayer(id)!;
-            return Ok(MapInjury(updatedInjury));
+            var injury = await _sender.Send(new UpdateInjuryCommand(id, request));
+            return Ok(injury);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [Authorize(Roles = ApplicationRoles.Admin)]
+        public async Task<IActionResult> Delete(int id)
         {
-            var injury = _uow.Injuries.GetById(id);
-            if (injury == null)
-            {
-                return NotFound();
-            }
-
-            _uow.Injuries.Remove(injury);
-            _uow.SaveChanges();
-
+            await _sender.Send(new DeleteInjuryCommand(id));
             return NoContent();
         }
-
-        private IActionResult ValidationError(ValidationResult validationResult) =>
-            BadRequest(validationResult.Errors.Select(error => new { error.PropertyName, error.ErrorMessage }));
-
-        private static InjuryDto MapInjury(Injury injury) =>
-            new()
-            {
-                Id = injury.Id,
-                PlayerId = injury.PlayerId,
-                PlayerName = $"{injury.Player?.FirstName} {injury.Player?.LastName}".Trim(),
-                Description = injury.Description,
-                InjuryDate = injury.InjuryDate,
-                RecoveryDate = injury.RecoveryDate,
-                IsActive = injury.IsActive
-            };
     }
 }
