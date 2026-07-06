@@ -26,6 +26,7 @@ projekat/
 |  |- Mapping/
 |  |- Services/
 |  |- Validators/
+|  |- wwwroot/
 |  |- Program.cs
 |  |- appsettings.json
 |  |- BasketballFantasy.API.http
@@ -112,12 +113,28 @@ dotnet tool run dotnet-ef database update --project "BasketballFantasy.Infrastru
 dotnet run --project "BasketballFantasy.API\BasketballFantasy.API.csproj"
 ```
 
-5. Prijava za administraciju:
+5. Otvori frontend u browser-u:
+
+- `http://localhost:5126/` prema podrazumevanom `launchSettings.json` profilu
+
+6. Prijava za administraciju:
 
 - korisnicko ime: `admin`
 - lozinka: `Admin123!`
 
 Posle login-a koristi JWT token kroz `Authorization: Bearer <token>`.
+
+Frontend je staticki hostovan iz `BasketballFantasy.API/wwwroot` i sluzi za laksi rad sa svim glavnim resursima:
+
+- prijava i registracija korisnika
+- pregled i CRUD nad timovima, igracima, trenerima, utakmicama, statistikama, povredama i fantasy timovima
+- dodatni pregledi kao sto su top scoreri, aktivne povrede, ukupna statistika igraca i export u Excel
+
+Napomena za development:
+
+- `appsettings.Development.json` koristi `InMemory` provider da bi aplikacija i frontend mogli odmah da se pokrenu bez LocalDB instance
+- pri prvom startu development seed ubacuje demo timove, igrace, statistike, povredu i fantasy tim
+- `appsettings.json` i SQL Server migracije ostaju dostupni za varijantu sa pravom bazom
 
 ## Sta napisati u dokumentaciji
 

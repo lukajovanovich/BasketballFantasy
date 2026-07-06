@@ -2,9 +2,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using BasketballFantasy.API.Auth;
+using BasketballFantasy.API.Data;
 using BasketballFantasy.API.Mapping;
 using BasketballFantasy.API.Middleware;
-using BasketballFantasy.API.Services;
 using BasketballFantasy.Domain.Repositories;
 using BasketballFantasy.Infrastructure;
 using BasketballFantasy.Infrastructure.Identity;
@@ -13,26 +13,44 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
 builder.Services.AddOpenApi();
+var databaseProvider = builder.Configuration["DatabaseProvider"];
 builder.Services.AddDbContext<BasketballFantasyContext>(options =>
-    options
-        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-        .EnableSensitiveDataLogging());
+{
+    if (string.Equals(databaseProvider, "InMemory", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseInMemoryDatabase("BasketballFantasyDevDb");
+    }
+    else
+    {
+        options
+            .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+            .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+    }
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    }
+});
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<FantasyPointsService>();
-builder.Services.AddScoped<ExcelExportService>();
 builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
@@ -74,9 +92,26 @@ if (app.Environment.IsDevelopment())
 
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider.GetRequiredService<BasketballFantasyContext>();
+    if (dbContext.Database.IsRelational())
+    {
+        await dbContext.Database.MigrateAsync();
+    }
+    else
+    {
+        await dbContext.Database.EnsureCreatedAsync();
+    }
+
     await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+
+    if (app.Environment.IsDevelopment())
+    {
+        await DevelopmentDataSeeder.SeedAsync(dbContext);
+    }
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();

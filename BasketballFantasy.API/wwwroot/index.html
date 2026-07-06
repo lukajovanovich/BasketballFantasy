@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Basketball Fantasy Hub</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <div class="hero__brand">
+                <p class="eyebrow">Basketball Fantasy</p>
+                <h1>Kontrolna tabla za ligu, statistiku i fantasy timove</h1>
+                <p class="hero__copy">
+                    Jednostavan frontend za pregled i uredjivanje svih glavnih resursa iz projekta,
+                    sa prijavom preko JWT tokena i brzim pristupom najvaznijim izvestajima.
+                </p>
+            </div>
+
+            <div class="hero__status" id="sessionSummary"></div>
+        </header>
+
+        <div class="layout">
+            <aside class="sidebar">
+                <div class="sidebar__card">
+                    <p class="sidebar__label">Navigacija</p>
+                    <nav id="navPanel" class="nav-list" aria-label="Glavna navigacija"></nav>
+                </div>
+
+                <div class="sidebar__card sidebar__card--accent">
+                    <p class="sidebar__label">Brzi pristup</p>
+                    <p class="sidebar__text">
+                        Seed admin nalog je spreman za testiranje:
+                    </p>
+                    <div class="credentials">
+                        <span>admin</span>
+                        <span>Admin123!</span>
+                    </div>
+                    <button class="button button--ghost" type="button" data-action="fill-admin">
+                        Popuni admin prijavu
+                    </button>
+                </div>
+            </aside>
+
+            <main class="content">
+                <section id="heroMetrics" class="metric-strip"></section>
+                <section id="authSection"></section>
+                <section id="workspace"></section>
+            </main>
+        </div>
+    </div>
+
+    <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
