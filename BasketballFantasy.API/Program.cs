@@ -25,6 +25,7 @@ builder.Logging.AddDebug();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddOpenApi();
 var databaseProvider = builder.Configuration["DatabaseProvider"];

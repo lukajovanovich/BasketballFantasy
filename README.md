@@ -132,7 +132,7 @@ Frontend je staticki hostovan iz `BasketballFantasy.API/wwwroot` i sluzi za laks
 
 Napomena za development:
 
-- `appsettings.Development.json` koristi `InMemory` provider da bi aplikacija i frontend mogli odmah da se pokrenu bez LocalDB instance
+- podrazumevano se koristi SQL Server (LocalDB); za pokretanje bez baze postavi `DatabaseProvider=InMemory` (npr. `DatabaseProvider=InMemory dotnet run --project BasketballFantasy.API/BasketballFantasy.API.csproj`, u PowerShell-u `$env:DatabaseProvider="InMemory"` pre `dotnet run`)
 - pri prvom startu development seed ubacuje demo timove, igrace, statistike, povredu i fantasy tim
 - `appsettings.json` i SQL Server migracije ostaju dostupni za varijantu sa pravom bazom
 
@@ -178,6 +178,7 @@ Opisati sve klase iz domena i navesti relacije:
 - statisticki atributi ne mogu biti negativni
 - `RecoveryDate` ne moze biti pre `InjuryDate`
 - u istoj utakmici jedan igrac ne moze imati duplu statistiku
+- statistika moze da se unese samo igracu ciji tim igra u toj utakmici
 - fantasy tim ne moze imati vise od 5 startera
 - fantasy tim ne moze imati vise od 4 igraca na klupi
 - isti igrac ne moze biti dodat dva puta u isti fantasy tim

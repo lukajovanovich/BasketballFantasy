@@ -22,15 +22,7 @@ namespace BasketballFantasy.API.Features.PlayerStatistics
 
         public Task<PlayerStatisticDto> Handle(CreatePlayerStatisticCommand request, CancellationToken cancellationToken)
         {
-            if (_unitOfWork.Players.GetById(request.Request.PlayerId) == null)
-            {
-                throw new BadRequestException($"Igrac sa Id={request.Request.PlayerId} ne postoji.");
-            }
-
-            if (_unitOfWork.Matches.GetById(request.Request.MatchId) == null)
-            {
-                throw new BadRequestException($"Utakmica sa Id={request.Request.MatchId} ne postoji.");
-            }
+            PlayerStatisticRules.EnsurePlayerPlaysInMatch(_unitOfWork, request.Request.PlayerId, request.Request.MatchId);
 
             if (_unitOfWork.PlayerStatistics.Find(statistic =>
                     statistic.PlayerId == request.Request.PlayerId &&
@@ -68,15 +60,7 @@ namespace BasketballFantasy.API.Features.PlayerStatistics
             var statistic = _unitOfWork.PlayerStatistics.GetById(request.Id)
                 ?? throw new NotFoundException($"Statistika sa Id={request.Id} nije pronadjena.");
 
-            if (_unitOfWork.Players.GetById(request.Request.PlayerId) == null)
-            {
-                throw new BadRequestException($"Igrac sa Id={request.Request.PlayerId} ne postoji.");
-            }
-
-            if (_unitOfWork.Matches.GetById(request.Request.MatchId) == null)
-            {
-                throw new BadRequestException($"Utakmica sa Id={request.Request.MatchId} ne postoji.");
-            }
+            PlayerStatisticRules.EnsurePlayerPlaysInMatch(_unitOfWork, request.Request.PlayerId, request.Request.MatchId);
 
             if (_unitOfWork.PlayerStatistics.Find(existingStatistic =>
                     existingStatistic.PlayerId == request.Request.PlayerId &&
@@ -117,6 +101,23 @@ namespace BasketballFantasy.API.Features.PlayerStatistics
             _unitOfWork.SaveChanges();
 
             return Task.FromResult(Unit.Value);
+        }
+    }
+
+    internal static class PlayerStatisticRules
+    {
+        public static void EnsurePlayerPlaysInMatch(IUnitOfWork unitOfWork, int playerId, int matchId)
+        {
+            var player = unitOfWork.Players.GetById(playerId)
+                ?? throw new BadRequestException($"Igrac sa Id={playerId} ne postoji.");
+
+            var match = unitOfWork.Matches.GetById(matchId)
+                ?? throw new BadRequestException($"Utakmica sa Id={matchId} ne postoji.");
+
+            if (player.TeamId != match.HomeTeamId && player.TeamId != match.AwayTeamId)
+            {
+                throw new BadRequestException("Tim ovog igraca ne igra u izabranoj utakmici.");
+            }
         }
     }
 }
